@@ -1,10 +1,10 @@
-package handler
+package controller
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/RobinBaeckman/hermod-api/adapter/admin/auth/presenter"
+	"github.com/RobinBaeckman/hermod-api/application/admin/auth/presenter"
 	"github.com/RobinBaeckman/hermod-api/domain/admin"
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/auth/view"

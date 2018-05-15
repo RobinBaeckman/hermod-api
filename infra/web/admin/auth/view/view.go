@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/RobinBaeckman/hermod-api/adapter/admin/auth/presenter"
+	"github.com/RobinBaeckman/hermod-api/application/admin/auth/presenter"
 	"github.com/gorilla/sessions"
 )
 

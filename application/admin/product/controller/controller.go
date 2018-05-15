@@ -1,9 +1,9 @@
-package handler
+package controller
 
 import (
 	"net/http"
 
-	"github.com/RobinBaeckman/hermod-api/adapter/admin/product/presenter"
+	"github.com/RobinBaeckman/hermod-api/application/admin/product/presenter"
 	"github.com/RobinBaeckman/hermod-api/domain/product"
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/product/view"

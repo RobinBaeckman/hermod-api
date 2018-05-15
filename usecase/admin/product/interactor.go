@@ -21,20 +21,20 @@ type ReqBody struct {
 	Title string
 }
 
-func (i *Interactor) Create(rb ReqBody) error {
+func (i *Interactor) Store(rb ReqBody) error {
 	fmt.Println("######[Interactor]########")
 	fmt.Println(rb)
 	fmt.Println("#########################")
 
 	p := rb.mapEntity()
 
-	p, _ = i.Store(p)
+	p, _ = i.Persist(p)
 	i.PresentCreated(&p)
 
 	return nil
 }
 
-func (i *Interactor) Get(id string) (domain.Product, error) {
+func (i *Interactor) Show(id string) (domain.Product, error) {
 	p, _ := i.Get(id)
 
 	i.Present(&p)
@@ -42,7 +42,7 @@ func (i *Interactor) Get(id string) (domain.Product, error) {
 	return p, nil
 }
 
-func (i *Interactor) GetAll() ([]*domain.Product, error) {
+func (i *Interactor) Index() ([]*domain.Product, error) {
 	p, _ := i.GetAll()
 
 	i.PresentAll(p)

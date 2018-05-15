@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/RobinBaeckman/hermod-api/adapter/admin/admin/presenter"
+	"github.com/RobinBaeckman/hermod-api/application/admin/admin/presenter"
 )
 
 type Viewer struct {
 	http.ResponseWriter
 }
 
-func (v Viewer) ViewCreated(vm *presenter.ViewModel) (err error) {
+func (v Viewer) ViewStored(vm *presenter.ViewModel) (err error) {
 	jbs, err := json.Marshal(vm)
 	if err != nil {
 		return err

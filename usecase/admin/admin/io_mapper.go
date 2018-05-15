@@ -5,7 +5,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (outd *OutputData) mapper(a *domain.Admin) {
+type InputData struct {
+	ID        string
+	Email     string
+	Password  string
+	FirstName string
+	LastName  string
+}
+
+type OutputData struct {
+	ID        string
+	Email     string
+	Password  string
+	FirstName string
+	LastName  string
+}
+
+func (outd *OutputData) Map(a *domain.Admin) {
 	*outd = OutputData{
 		ID:        a.ID,
 		Email:     a.Email,
@@ -15,7 +31,7 @@ func (outd *OutputData) mapper(a *domain.Admin) {
 	}
 }
 
-func (ind InputData) createMapper(a *domain.Admin) error {
+func (ind InputData) MapWhole(a *domain.Admin) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(ind.Password), bcrypt.DefaultCost)
 	a.Password = hash
 	if err != nil {
@@ -32,7 +48,7 @@ func (ind InputData) createMapper(a *domain.Admin) error {
 	return nil
 }
 
-func (ind InputData) mapper(a *domain.Admin) {
+func (ind InputData) Map(a *domain.Admin) {
 	*a = domain.Admin{
 		ID:    ind.ID,
 		Email: ind.Email,

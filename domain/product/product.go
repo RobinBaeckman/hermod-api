@@ -4,7 +4,7 @@ import "github.com/RobinBaeckman/hermod-api/domain"
 
 // ProductRepository is the repo for a product
 type Repository interface {
-	Store(p domain.Product) (domain.Product, error)
+	Persist(p domain.Product) (domain.Product, error)
 	Get(id string) (domain.Product, error)
 	GetAll() ([]*domain.Product, error)
 }

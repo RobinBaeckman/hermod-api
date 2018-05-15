@@ -9,7 +9,7 @@ type Presenter struct {
 }
 
 type Viewer interface {
-	ViewCreated(*ViewModel) (err error)
+	ViewStored(*ViewModel) (err error)
 	View(*ViewModel) (err error)
 	ViewAll(*[]ViewModel) (err error)
 }
@@ -22,12 +22,12 @@ type ViewModel struct {
 	LastName  string
 }
 
-func (p Presenter) PresentCreated(outd *admin.OutputData) (err error) {
+func (p Presenter) PresentStored(outd *admin.OutputData) (err error) {
 	vm := &ViewModel{}
-	if err = vm.mapper(outd); err != nil {
+	if err = vm.Map(outd); err != nil {
 		return err
 	}
-	if err = p.ViewCreated(vm); err != nil {
+	if err = p.ViewStored(vm); err != nil {
 		return err
 	}
 
@@ -36,7 +36,7 @@ func (p Presenter) PresentCreated(outd *admin.OutputData) (err error) {
 
 func (p Presenter) Present(outd *admin.OutputData) (err error) {
 	vm := &ViewModel{}
-	if err = vm.mapper(outd); err != nil {
+	if err = vm.Map(outd); err != nil {
 		return err
 	}
 	if err = p.View(vm); err != nil {
@@ -50,7 +50,7 @@ func (p Presenter) PresentAll(outds *[]admin.OutputData) (err error) {
 	vms := []ViewModel{}
 	for _, outd := range *outds {
 		vm := &ViewModel{}
-		if err = vm.mapper(&outd); err != nil {
+		if err = vm.Map(&outd); err != nil {
 			return err
 		}
 		vms = append(vms, *vm)
@@ -61,16 +61,4 @@ func (p Presenter) PresentAll(outds *[]admin.OutputData) (err error) {
 	}
 
 	return
-}
-
-func (vm *ViewModel) mapper(outd *admin.OutputData) error {
-	*vm = ViewModel{
-		ID:        outd.ID,
-		Email:     outd.Email,
-		Password:  "*****",
-		FirstName: outd.FirstName,
-		LastName:  outd.LastName,
-	}
-
-	return nil
 }

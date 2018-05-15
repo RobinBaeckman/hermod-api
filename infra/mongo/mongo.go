@@ -1,11 +1,8 @@
 package mongo
 
 import (
-	"fmt"
-	"log"
-
+	"github.com/RobinBaeckman/hermod-api/customerr"
 	"github.com/RobinBaeckman/hermod-api/domain"
-	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -35,19 +32,7 @@ type AuthDB struct {
 	Conn *mgo.Database
 }
 
-type HomeDB struct {
-	Conn *mgo.Database
-}
-
 type AdminDB struct {
-	Conn *mgo.Database
-}
-
-type LoginDB struct {
-	Conn *mgo.Database
-}
-
-type IndexDB struct {
 	Conn *mgo.Database
 }
 
@@ -62,106 +47,87 @@ func NewAuthDB(db *mgo.Database) *AuthDB {
 		Conn: db,
 	}
 }
-func NewHomeDB(db *mgo.Database) *HomeDB {
-	return &HomeDB{
-		Conn: db,
-	}
-}
 func NewAdminDB(db *mgo.Database) *AdminDB {
 	return &AdminDB{
 		Conn: db,
 	}
 }
-func NewLoginDB(db *mgo.Database) *LoginDB {
-	return &LoginDB{
-		Conn: db,
-	}
-}
-func NewIndexDB(db *mgo.Database) *IndexDB {
-	return &IndexDB{
-		Conn: db,
-	}
-}
 
-func (db *ProductDB) Store(p domain.Product) (domain.Product, error) {
-	fmt.Println("######[DB]########")
-	fmt.Println(p)
-	fmt.Println("#########################")
-
+func (db *ProductDB) Persist(p domain.Product) (domain.Product, error) {
 	p.ID = uuid.NewV4().String()
 	err := db.Conn.C("products").Find(bson.M{"id": p.ID}).One(&p)
 	if err != nil {
-		log.Fatal(err)
+		return p, err
 	}
 
 	return p, nil
 }
 
 func (db *ProductDB) Get(id string) (domain.Product, error) {
-	product := domain.Product{}
+	p := domain.Product{}
 
-	err := db.Conn.C("products").Find(bson.M{"id": id}).One(&product)
+	err := db.Conn.C("products").Find(bson.M{"id": id}).One(&p)
 	if err != nil {
-		log.Fatal(err)
+		return p, &customerr.App{err, "There is no product with that id.", 404}
 	}
 
-	return product, nil
+	return p, nil
 }
 
 func (db *ProductDB) GetAll() ([]*domain.Product, error) {
-	products := []*domain.Product{}
-	err := db.Conn.C("products").Find(nil).All(&products)
+	p := []*domain.Product{}
+	err := db.Conn.C("products").Find(nil).All(&p)
 	if err != nil {
-		log.Fatal(err)
+		return p, &customerr.App{err, "There is no product with that id.", 404}
 	}
 
-	return products, nil
+	return p, nil
 }
 
 func (db *AuthDB) Get(email string) (domain.Admin, error) {
 	a := domain.Admin{}
 	err := db.Conn.C("admins").Find(bson.M{"email": email}).One(&a)
 	if err != nil {
-		errors.Wrap(err, "Wrong password or username")
+		return a, &customerr.App{err, "Wrong password or username", 404}
 	}
 
 	return a, nil
 }
 
-func (db *AuthDB) Store(a domain.Admin) error {
+func (db *AuthDB) Persist(a domain.Admin) error {
 	a.ID = uuid.NewV4().String()
 	err := db.Conn.C("admins").Find(bson.M{"id": a.ID}).One(&a)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
 }
 
-func (db *AdminDB) GetSingle(a *domain.Admin) error {
+func (db *AdminDB) Get(a *domain.Admin) error {
 
-	err := db.Conn.C("admins").Find(bson.M{"email": a.Email}).One(a)
+	err := db.Conn.C("admins").Find(bson.M{"id": a.ID}).One(a)
 	if err != nil {
-		errors.Wrap(err, "Wrong password or username")
+		return &customerr.App{err, "There is no admin user with that id.", 404}
 	}
 
 	return nil
 }
 
-func (db *AdminDB) Store(a *domain.Admin) error {
+func (db *AdminDB) Persist(a *domain.Admin) error {
 	a.ID = uuid.NewV4().String()
 	err := db.Conn.C("admins").Insert(a)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
 }
 
-func (db *AdminDB) GetMany(as *[]domain.Admin) error {
+func (db *AdminDB) GetAll(as *[]domain.Admin) error {
 	err := db.Conn.C("admins").Find(nil).All(as)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil

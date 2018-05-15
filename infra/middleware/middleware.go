@@ -21,8 +21,7 @@ func Login(cs *sessions.CookieStore) Adapter {
 				return
 			}
 
-			// Print secret message
-			fmt.Fprintln(w, "You are authenticated")
+			fmt.Println("You are authenticated")
 
 		})
 	}
@@ -40,8 +39,7 @@ func Auth(store *sessions.CookieStore) Adapter {
 				return
 			}
 
-			// Print secret message
-			fmt.Fprintln(w, "You are authenticated")
+			fmt.Println("You are authenticated")
 
 			// Now you can write back your template or re-direct elsewhere
 			h.ServeHTTP(w, r)
@@ -53,7 +51,6 @@ func Notify(logger *log.Logger) Adapter {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			logger.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
-			//defer logger.Println("after")
 			h.ServeHTTP(w, r)
 		})
 	}

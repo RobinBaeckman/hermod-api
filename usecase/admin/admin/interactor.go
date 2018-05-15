@@ -14,27 +14,27 @@ type Interactor struct {
 }
 
 type Repository interface {
-	Store(*domain.Admin) error
-	GetSingle(*domain.Admin) error
-	GetMany(*[]domain.Admin) error
+	Persist(*domain.Admin) error
+	Get(*domain.Admin) error
+	GetAll(*[]domain.Admin) error
 }
 
 type Presenter interface {
-	PresentCreated(*OutputData) (err error)
+	PresentStored(*OutputData) (err error)
 	Present(*OutputData) (err error)
 	PresentAll(*[]OutputData) (err error)
 }
 
-func (i *Interactor) GetAll() (err error) {
+func (i *Interactor) Index() (err error) {
 	as := &[]domain.Admin{}
-	err = i.GetMany(as)
+	err = i.GetAll(as)
 	if err != nil {
 		return err
 	}
 	outds := []OutputData{}
 	for _, a := range *as {
 		outd := &OutputData{}
-		outd.mapper(&a)
+		outd.Map(&a)
 		outds = append(outds, *outd)
 	}
 	if err = i.PresentAll(&outds); err != nil {
@@ -44,15 +44,15 @@ func (i *Interactor) GetAll() (err error) {
 	return
 }
 
-func (i *Interactor) Get(ind InputData) (err error) {
+func (i *Interactor) Show(ind InputData) (err error) {
 	a := &domain.Admin{}
-	ind.mapper(a)
-	err = i.GetSingle(a)
+	ind.Map(a)
+	err = i.Get(a)
 	if err != nil {
 		return err
 	}
 	outd := &OutputData{}
-	outd.mapper(a)
+	outd.Map(a)
 	if err := i.Present(outd); err != nil {
 		return err
 	}
@@ -60,18 +60,18 @@ func (i *Interactor) Get(ind InputData) (err error) {
 	return
 }
 
-func (i *Interactor) Create(ind InputData) (err error) {
+func (i *Interactor) Store(ind InputData) (err error) {
 	a := &domain.Admin{}
-	if err = ind.createMapper(a); err != nil {
+	if err = ind.MapWhole(a); err != nil {
 		return err
 	}
-	outd := &OutputData{}
-	err = i.Store(a)
+	err = i.Persist(a)
 	if err != nil {
 		return err
 	}
-	outd.mapper(a)
-	if err = i.Present(outd); err != nil {
+	outd := &OutputData{}
+	outd.Map(a)
+	if err = i.PresentStored(outd); err != nil {
 		return err
 	}
 

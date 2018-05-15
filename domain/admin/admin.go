@@ -7,5 +7,5 @@ import (
 // UserRepository is the repo for a product
 type Repository interface {
 	Get(email string) (domain.Admin, error)
-	Store(domain.Admin) error
+	Persist(domain.Admin) error
 }
