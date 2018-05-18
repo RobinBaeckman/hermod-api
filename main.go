@@ -13,38 +13,41 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/spf13/viper"
+	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {
 	parseConfig()
+	db := newMongo()
 	cStore := sessions.NewCookieStore([]byte(viper.GetString("session.auth_key")))
 	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), log.Ltime)
+	authApp := &authcontroller.App{CStore: cStore, DB: db}
+	adminApp := &admincontroller.App{CStore: cStore, DB: db}
 	r := mux.NewRouter()
-	s := &authcontroller.App{CStore: cStore}
 	// API
 	//r.Handle("/products", phandler.Create).Methods("POST")
 	//r.Handle("/products/{id}", phandler.Get).Methods("GET")
 	//r.Handle("/products", phandler.GetAll).Methods("GET")
 	r.Handle("/api/v1/admin/auth", Adapt(
-		customerr.Check(s.Auth),
+		customerr.Check(authApp.Auth),
 		middleware.Login(cStore),
 		middleware.Notify(logger),
 	)).Methods("POST")
 	r.Handle("/api/v1/admins", Adapt(
-		customerr.Check(admincontroller.Store),
+		customerr.Check(adminApp.Store),
 		middleware.Auth(cStore),
 		middleware.Notify(logger),
 	)).Methods("POST")
 	r.Handle("/api/v1/admins/{id}", Adapt(
-		customerr.Check(admincontroller.Show),
+		customerr.Check(adminApp.Show),
 		middleware.Auth(cStore),
 		middleware.Notify(logger),
 	)).Methods("GET")
 	r.Handle("/api/v1/admins", Adapt(
-		customerr.Check(admincontroller.Index),
+		customerr.Check(adminApp.Index),
 		middleware.Auth(cStore),
 	)).Methods("GET")
-	r.HandleFunc("/api/v1/logout", s.Logout).Methods("GET")
+	r.HandleFunc("/api/v1/logout", authApp.Logout).Methods("GET")
 
 	http.Handle("/", r)
 
@@ -65,4 +68,18 @@ func parseConfig() {
 	if err != nil {               // Handle errors reading the config file
 		fmt.Errorf("Fatal error config file: %s \n", err)
 	}
+}
+
+func newMongo() *mgo.Database {
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		panic(err)
+	}
+
+	// Optional. Switch the session to a monotonic behavior.
+	session.SetMode(mgo.Monotonic, true)
+
+	c := session.DB("hermod")
+
+	return c
 }

@@ -11,10 +11,12 @@ import (
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/auth"
 	"github.com/gorilla/sessions"
 	"github.com/spf13/viper"
+	mgo "gopkg.in/mgo.v2"
 )
 
 type App struct {
 	CStore *sessions.CookieStore
+	DB     *mgo.Database
 }
 
 func NewInteractor(r admin.Repository, p auth.Presenter) *auth.Interactor {
@@ -25,7 +27,7 @@ func NewInteractor(r admin.Repository, p auth.Presenter) *auth.Interactor {
 }
 
 func (a *App) Auth(w http.ResponseWriter, r *http.Request) (err error) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(
 		admin.Repository(mongo.NewAuthDB(db)),

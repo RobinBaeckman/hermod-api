@@ -7,7 +7,14 @@ import (
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/admin/view"
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/admin"
+	"github.com/gorilla/sessions"
+	mgo "gopkg.in/mgo.v2"
 )
+
+type App struct {
+	CStore *sessions.CookieStore
+	DB     *mgo.Database
+}
 
 func NewInteractor(db *mongo.AdminDB, w http.ResponseWriter) *admin.Interactor {
 	return &admin.Interactor{
@@ -16,8 +23,8 @@ func NewInteractor(db *mongo.AdminDB, w http.ResponseWriter) *admin.Interactor {
 	}
 }
 
-func Store(w http.ResponseWriter, r *http.Request) (err error) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+func (a *App) Store(w http.ResponseWriter, r *http.Request) (err error) {
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(&mongo.AdminDB{db}, w)
 	ind, err := mapCreateRequest(r)
@@ -31,8 +38,8 @@ func Store(w http.ResponseWriter, r *http.Request) (err error) {
 	return
 }
 
-func Show(w http.ResponseWriter, r *http.Request) (err error) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+func (a *App) Show(w http.ResponseWriter, r *http.Request) (err error) {
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(&mongo.AdminDB{db}, w)
 	ind, err := mapGetRequest(r)
@@ -46,8 +53,8 @@ func Show(w http.ResponseWriter, r *http.Request) (err error) {
 	return nil
 }
 
-func Index(w http.ResponseWriter, r *http.Request) (err error) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+func (a *App) Index(w http.ResponseWriter, r *http.Request) (err error) {
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(&mongo.AdminDB{db}, w)
 	if err := i.Index(); err != nil {
