@@ -15,6 +15,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+type App struct {
+	store *sessions.CookieStore
+}
+
 func main() {
 	parseConfig()
 	cStore := sessions.NewCookieStore([]byte(viper.GetString("session.auth_key")))
