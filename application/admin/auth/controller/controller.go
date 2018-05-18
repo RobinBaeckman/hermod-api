@@ -13,7 +13,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Store *sessions.CookieStore
+type App struct {
+	CStore *sessions.CookieStore
+}
 
 func NewInteractor(r admin.Repository, p auth.Presenter) *auth.Interactor {
 	return &auth.Interactor{
@@ -22,12 +24,12 @@ func NewInteractor(r admin.Repository, p auth.Presenter) *auth.Interactor {
 	}
 }
 
-func Auth(w http.ResponseWriter, r *http.Request) (err error) {
+func (a *App) Auth(w http.ResponseWriter, r *http.Request) (err error) {
 	db := mongo.DB.With(mongo.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(
 		admin.Repository(mongo.NewAuthDB(db)),
-		presenter.Presenter{view.Viewer{w, r, Store}},
+		presenter.Presenter{view.Viewer{w, r, a.CStore}},
 	)
 
 	ind := &auth.InputData{}
@@ -45,8 +47,8 @@ func Auth(w http.ResponseWriter, r *http.Request) (err error) {
 	return
 }
 
-func Logout(w http.ResponseWriter, r *http.Request) {
-	session, _ := Store.Get(r, viper.GetString("session.cookie_name"))
+func (a *App) Logout(w http.ResponseWriter, r *http.Request) {
+	session, _ := a.CStore.Get(r, viper.GetString("session.cookie_name"))
 
 	// Revoke users authentication
 	session.Values["authenticated"] = false

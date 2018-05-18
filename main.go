@@ -15,22 +15,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-type App struct {
-	store *sessions.CookieStore
-}
-
 func main() {
 	parseConfig()
 	cStore := sessions.NewCookieStore([]byte(viper.GetString("session.auth_key")))
 	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), log.Ltime)
 	r := mux.NewRouter()
-	authcontroller.Store = cStore
+	s := &authcontroller.App{CStore: cStore}
 	// API
 	//r.Handle("/products", phandler.Create).Methods("POST")
 	//r.Handle("/products/{id}", phandler.Get).Methods("GET")
 	//r.Handle("/products", phandler.GetAll).Methods("GET")
 	r.Handle("/api/v1/admin/auth", Adapt(
-		customerr.Check(authcontroller.Auth),
+		customerr.Check(s.Auth),
 		middleware.Login(cStore),
 		middleware.Notify(logger),
 	)).Methods("POST")
@@ -48,7 +44,7 @@ func main() {
 		customerr.Check(admincontroller.Index),
 		middleware.Auth(cStore),
 	)).Methods("GET")
-	r.HandleFunc("/api/v1/logout", authcontroller.Logout).Methods("GET")
+	r.HandleFunc("/api/v1/logout", s.Logout).Methods("GET")
 
 	http.Handle("/", r)
 
