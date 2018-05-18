@@ -38,7 +38,7 @@ func (a *App) Auth(w http.ResponseWriter, r *http.Request) (err error) {
 	decoder := json.NewDecoder(r.Body)
 	err = decoder.Decode(ind)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer r.Body.Close()
 
