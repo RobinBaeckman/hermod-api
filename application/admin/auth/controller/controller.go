@@ -10,6 +10,7 @@ import (
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/auth/view"
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/auth"
 	"github.com/gorilla/sessions"
+	"github.com/spf13/viper"
 )
 
 var Store *sessions.CookieStore
@@ -37,13 +38,15 @@ func Auth(w http.ResponseWriter, r *http.Request) (err error) {
 	}
 	defer r.Body.Close()
 
-	i.Auth(*ind)
+	if err := i.Auth(*ind); err != nil {
+		return err
+	}
 
 	return
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	session, _ := Store.Get(r, "cookie-name")
+	session, _ := Store.Get(r, viper.GetString("session.cookie_name"))
 
 	// Revoke users authentication
 	session.Values["authenticated"] = false

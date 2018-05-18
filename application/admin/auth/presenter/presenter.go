@@ -16,11 +16,11 @@ type Viewer interface {
 }
 
 type ViewModel struct {
-	ID        string
-	Email     string
-	Password  []byte
-	FirstName string
-	LastName  string
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Password  []byte `json:"password"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 func (p Presenter) Present(outd auth.OutputData) (err error) {

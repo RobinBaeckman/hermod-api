@@ -15,11 +15,11 @@ type Viewer interface {
 }
 
 type ViewModel struct {
-	ID        string
-	Email     string
-	Password  string
-	FirstName string
-	LastName  string
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 func (p Presenter) PresentStored(outd *admin.OutputData) (err error) {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/RobinBaeckman/hermod-api/application/admin/auth/presenter"
 	"github.com/gorilla/sessions"
+	"github.com/spf13/viper"
 )
 
 type Viewer struct {
@@ -19,7 +20,8 @@ func (v Viewer) View(vm presenter.ViewModel) error {
 	if err != nil {
 		return err
 	}
-	session, _ := v.Store.Get(v.R, "cookie-name")
+
+	session, _ := v.Store.Get(v.R, viper.GetString("session.cookie_name"))
 	session.Values["authenticated"] = true
 	session.Values["role"] = "admin"
 	session.Save(v.R, v.W)
