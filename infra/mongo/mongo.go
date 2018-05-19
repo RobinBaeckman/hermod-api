@@ -51,37 +51,6 @@ func NewAdminDB(db *mgo.Database) *AdminDB {
 	}
 }
 
-func (db *ProductDB) Persist(p domain.Product) (domain.Product, error) {
-	p.ID = uuid.NewV4().String()
-	err := db.Conn.C("products").Find(bson.M{"id": p.ID}).One(&p)
-	if err != nil {
-		return p, err
-	}
-
-	return p, nil
-}
-
-func (db *ProductDB) Get(id string) (domain.Product, error) {
-	p := domain.Product{}
-
-	err := db.Conn.C("products").Find(bson.M{"id": id}).One(&p)
-	if err != nil {
-		return p, &customerr.App{err, "There is no product with that id.", 404}
-	}
-
-	return p, nil
-}
-
-func (db *ProductDB) GetAll() ([]*domain.Product, error) {
-	p := []*domain.Product{}
-	err := db.Conn.C("products").Find(nil).All(&p)
-	if err != nil {
-		return p, &customerr.App{err, "There is no product with that id.", 404}
-	}
-
-	return p, nil
-}
-
 func (db *AuthDB) Get(email string) (domain.Admin, error) {
 	a := domain.Admin{}
 	err := db.Conn.C("admins").Find(bson.M{"email": email}).One(&a)
@@ -124,6 +93,34 @@ func (db *AdminDB) Persist(a *domain.Admin) error {
 
 func (db *AdminDB) GetAll(as *[]domain.Admin) error {
 	err := db.Conn.C("admins").Find(nil).All(as)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *ProductDB) Get(p *domain.Product) error {
+	err := db.Conn.C("products").Find(bson.M{"id": p.ID}).One(p)
+	if err != nil {
+		return &customerr.App{err, "There is no admin user with that id.", 404}
+	}
+
+	return nil
+}
+
+func (db *ProductDB) Persist(p *domain.Product) error {
+	p.ID = uuid.NewV4().String()
+	err := db.Conn.C("products").Insert(p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *ProductDB) GetAll(ps *[]domain.Product) error {
+	err := db.Conn.C("products").Find(nil).All(ps)
 	if err != nil {
 		return err
 	}

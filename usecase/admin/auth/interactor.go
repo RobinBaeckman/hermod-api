@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/RobinBaeckman/hermod-api/domain/admin"
+	"github.com/RobinBaeckman/hermod-api/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -10,8 +10,13 @@ type Controller struct {
 }
 
 type Interactor struct {
-	admin.Repository
+	Repository
 	Presenter
+}
+
+type Repository interface {
+	Get(email string) (domain.Admin, error)
+	Persist(domain.Admin) error
 }
 
 type Presenter interface {

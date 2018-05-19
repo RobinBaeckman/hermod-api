@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/RobinBaeckman/hermod-api/application/admin/auth/presenter"
-	"github.com/RobinBaeckman/hermod-api/domain/admin"
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/auth/view"
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/auth"
@@ -19,7 +18,7 @@ type App struct {
 	DB     *mgo.Database
 }
 
-func NewInteractor(r admin.Repository, p auth.Presenter) *auth.Interactor {
+func NewInteractor(r auth.Repository, p auth.Presenter) *auth.Interactor {
 	return &auth.Interactor{
 		r,
 		p,
@@ -30,7 +29,7 @@ func (a *App) Auth(w http.ResponseWriter, r *http.Request) (err error) {
 	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(
-		admin.Repository(mongo.NewAuthDB(db)),
+		auth.Repository(mongo.NewAuthDB(db)),
 		presenter.Presenter{view.Viewer{w, r, a.CStore}},
 	)
 

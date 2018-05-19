@@ -2,19 +2,32 @@ package controller
 
 import (
 	"encoding/json"
+	"net/http"
 
-	usecase "github.com/RobinBaeckman/hermod-api/usecase/admin/product"
+	"github.com/RobinBaeckman/hermod-api/usecase/admin/product"
+	"github.com/gorilla/mux"
 )
 
-func (r Req) mapRequest() usecase.ReqBody {
-	rb := usecase.ReqBody{}
+func mapStoreRequest(r *http.Request) (product.InputDataStore, error) {
+	ind := product.InputDataStore{}
 	decoder := json.NewDecoder(r.Body)
 
-	err := decoder.Decode(&rb)
+	err := decoder.Decode(&ind)
 	if err != nil {
-		panic(err)
+		return ind, err
 	}
+
 	defer r.Body.Close()
 
-	return rb
+	return ind, nil
+}
+
+func mapShowRequest(r *http.Request) (product.InputDataShow, error) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	ind := product.InputDataShow{
+		ID: id,
+	}
+
+	return ind, nil
 }

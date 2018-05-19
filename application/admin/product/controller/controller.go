@@ -4,59 +4,74 @@ import (
 	"net/http"
 
 	"github.com/RobinBaeckman/hermod-api/application/admin/product/presenter"
-	"github.com/RobinBaeckman/hermod-api/domain/product"
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/product/view"
-	usecase "github.com/RobinBaeckman/hermod-api/usecase/admin/product"
-	"github.com/gorilla/mux"
+	"github.com/RobinBaeckman/hermod-api/usecase/admin/product"
+	"github.com/RobinBaeckman/hermod-api/validate"
+	"github.com/gorilla/sessions"
+	mgo "gopkg.in/mgo.v2"
 )
 
-type Req struct {
-	*http.Request
+type App struct {
+	CStore *sessions.CookieStore
+	DB     *mgo.Database
 }
 
-func NewInteractor(r product.Repository, p product.Presenter) *usecase.Interactor {
-	return &usecase.Interactor{
-		r,
-		p,
+func NewInteractor(db *mongo.ProductDB, w http.ResponseWriter) *product.Interactor {
+	return &product.Interactor{
+		product.Repository(db),
+		presenter.Presenter{view.Viewer{w}},
 	}
 }
 
-func Create(w http.ResponseWriter, r *http.Request) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+func (a *App) Store(w http.ResponseWriter, r *http.Request) (err error) {
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
-	i := NewInteractor(
-		product.Repository(mongo.NewProductDB(db)),
-		presenter.Presenter{view.Viewer{w}},
-	)
+	i := NewInteractor(&mongo.ProductDB{db}, w)
 
-	req := Req{r}
-	rb := req.mapRequest()
+	ind, err := mapStoreRequest(r)
+	if err != nil {
+		return err
+	}
 
-	i.Create(rb)
+	if err := validate.Check(&ind); err != nil {
+		return err
+	}
+
+	if err := i.Store(ind); err != nil {
+		return err
+	}
+
+	return
 }
 
-func Get(w http.ResponseWriter, r *http.Request) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+func (a *App) Show(w http.ResponseWriter, r *http.Request) (err error) {
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
-	i := NewInteractor(
-		product.Repository(mongo.NewProductDB(db)),
-		presenter.Presenter{view.Viewer{w}},
-	)
+	i := NewInteractor(&mongo.ProductDB{db}, w)
+	ind, err := mapShowRequest(r)
+	if err != nil {
+		return err
+	}
 
-	params := mux.Vars(r)
-	id := params["id"]
+	if err := validate.Check(&ind); err != nil {
+		return err
+	}
 
-	i.Get(id)
+	if err := i.Show(ind); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func GetAll(w http.ResponseWriter, r *http.Request) {
-	db := mongo.DB.With(mongo.DB.Session.Copy())
+func (a *App) Index(w http.ResponseWriter, r *http.Request) (err error) {
+	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
-	i := NewInteractor(
-		product.Repository(mongo.NewProductDB(db)),
-		presenter.Presenter{view.Viewer{w}},
-	)
+	i := NewInteractor(&mongo.ProductDB{db}, w)
+	if err := i.Index(); err != nil {
+		return err
+	}
 
-	i.GetAll()
+	return
 }

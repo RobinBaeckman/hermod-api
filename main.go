@@ -8,6 +8,7 @@ import (
 
 	admincontroller "github.com/RobinBaeckman/hermod-api/application/admin/admin/controller"
 	authcontroller "github.com/RobinBaeckman/hermod-api/application/admin/auth/controller"
+	productcontroller "github.com/RobinBaeckman/hermod-api/application/admin/product/controller"
 	"github.com/RobinBaeckman/hermod-api/customerr"
 	"github.com/RobinBaeckman/hermod-api/infra/middleware"
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
@@ -23,16 +24,27 @@ func main() {
 	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), 3)
 	authApp := &authcontroller.App{CStore: cStore, DB: db}
 	adminApp := &admincontroller.App{CStore: cStore, DB: db}
+	productApp := &productcontroller.App{CStore: cStore, DB: db}
 	r := mux.NewRouter()
-	// API
-	//r.Handle("/products", phandler.Create).Methods("POST")
-	//r.Handle("/products/{id}", phandler.Get).Methods("GET")
-	//r.Handle("/products", phandler.GetAll).Methods("GET")
-	r.Handle("/api/v1/admin/auth", Adapt(
-		customerr.Check(authApp.Auth),
-		middleware.Login(cStore),
+
+	// Product
+	r.Handle("/api/v1/products", Adapt(
+		customerr.Check(productApp.Store),
+		middleware.Auth(cStore),
 		middleware.Notify(logger),
 	)).Methods("POST")
+	r.Handle("/api/v1/products/{id}", Adapt(
+		customerr.Check(productApp.Show),
+		middleware.Auth(cStore),
+		middleware.Notify(logger),
+	)).Methods("GET")
+	r.Handle("/api/v1/products", Adapt(
+		customerr.Check(productApp.Index),
+		middleware.Auth(cStore),
+		middleware.Notify(logger),
+	)).Methods("GET")
+
+	// Admin user
 	r.Handle("/api/v1/admins", Adapt(
 		customerr.Check(adminApp.Store),
 		middleware.Auth(cStore),
@@ -48,6 +60,13 @@ func main() {
 		middleware.Auth(cStore),
 		middleware.Notify(logger),
 	)).Methods("GET")
+
+	// Auth
+	r.Handle("/api/v1/admin/auth", Adapt(
+		customerr.Check(authApp.Auth),
+		middleware.Login(cStore),
+		middleware.Notify(logger),
+	)).Methods("POST")
 	r.HandleFunc("/api/v1/logout", authApp.Logout).Methods("GET")
 
 	http.Handle("/", r)

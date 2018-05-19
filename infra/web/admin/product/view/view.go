@@ -2,51 +2,44 @@ package view
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
-	"github.com/RobinBaeckman/hermod-api/domain"
+	"github.com/RobinBaeckman/hermod-api/application/admin/product/presenter"
 )
 
 type Viewer struct {
 	http.ResponseWriter
 }
 
-func (v Viewer) ViewCreated(p *domain.Product) {
-	fmt.Println("######[View]########")
-	fmt.Println(p)
-	fmt.Println("#########################")
-	jbs, err := json.Marshal(p)
+func (v Viewer) ViewStored(vm *presenter.ViewModel) (err error) {
+	jbs, err := json.Marshal(vm)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	v.Header().Set("Content-Type", "application/json")
-	v.WriteHeader(http.StatusOK)
 	v.Write(jbs)
+
+	return
 }
 
-func (v Viewer) View(p *domain.Product) {
-	fmt.Println("######[View]########")
-	fmt.Println(p)
-	fmt.Println("#########################")
-	jbs, err := json.Marshal(p)
+func (v Viewer) View(vm *presenter.ViewModel) (err error) {
+	jbs, err := json.Marshal(vm)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	v.Header().Set("Content-Type", "application/json")
-	v.WriteHeader(http.StatusOK)
 	v.Write(jbs)
+
+	return
 }
 
-func (v Viewer) ViewAll(p []*domain.Product) {
-	fmt.Println("######[View]########")
-	fmt.Println(p)
-	fmt.Println("#########################")
-	jbs, err := json.Marshal(p)
+func (v Viewer) ViewAll(vm *[]presenter.ViewModel) (err error) {
+	jbs, err := json.Marshal(vm)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	v.Header().Set("Content-Type", "application/json")
-	v.WriteHeader(http.StatusOK)
 	v.Write(jbs)
+
+	return
 }

@@ -1,10 +1,7 @@
 package product
 
 import (
-	"fmt"
-
 	"github.com/RobinBaeckman/hermod-api/domain"
-	"github.com/RobinBaeckman/hermod-api/domain/product"
 )
 
 type Controller struct {
@@ -12,40 +9,71 @@ type Controller struct {
 }
 
 type Interactor struct {
-	product.Repository
-	product.Presenter
+	Repository
+	Presenter
 }
 
-type ReqBody struct {
-	ID    string
-	Title string
+type Repository interface {
+	Persist(*domain.Product) error
+	Get(*domain.Product) error
+	GetAll(*[]domain.Product) error
 }
 
-func (i *Interactor) Store(rb ReqBody) error {
-	fmt.Println("######[Interactor]########")
-	fmt.Println(rb)
-	fmt.Println("#########################")
-
-	p := rb.mapEntity()
-
-	p, _ = i.Persist(p)
-	i.PresentCreated(&p)
-
-	return nil
+type Presenter interface {
+	PresentStored(*OutputData) (err error)
+	Present(*OutputData) (err error)
+	PresentAll(*[]OutputData) (err error)
 }
 
-func (i *Interactor) Show(id string) (domain.Product, error) {
-	p, _ := i.Get(id)
+func (i *Interactor) Index() (err error) {
+	ps := &[]domain.Product{}
+	err = i.GetAll(ps)
+	if err != nil {
+		return err
+	}
+	outds := []OutputData{}
+	for _, p := range *ps {
+		outd := &OutputData{}
+		outd.Map(&p)
+		outds = append(outds, *outd)
+	}
+	if err = i.PresentAll(&outds); err != nil {
+		return err
+	}
 
-	i.Present(&p)
-
-	return p, nil
+	return
 }
 
-func (i *Interactor) Index() ([]*domain.Product, error) {
-	p, _ := i.GetAll()
+func (i *Interactor) Show(ind InputDataShow) (err error) {
+	p := &domain.Product{}
+	ind.Map(p)
+	err = i.Get(p)
+	if err != nil {
+		return err
+	}
+	outd := &OutputData{}
+	outd.Map(p)
+	if err := i.Present(outd); err != nil {
+		return err
+	}
 
-	i.PresentAll(p)
+	return
+}
 
-	return p, nil
+func (i *Interactor) Store(ind InputDataStore) (err error) {
+	p := &domain.Product{}
+	if err = ind.Map(p); err != nil {
+		return err
+	}
+	err = i.Persist(p)
+	if err != nil {
+		return err
+	}
+	outd := &OutputData{}
+	outd.Map(p)
+	if err = i.PresentStored(outd); err != nil {
+		return err
+	}
+
+	return
 }
