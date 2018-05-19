@@ -20,7 +20,7 @@ func main() {
 	parseConfig()
 	db := newMongoDB()
 	cStore := sessions.NewCookieStore([]byte(viper.GetString("session.auth_key")))
-	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), log.Ltime)
+	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), 3)
 	authApp := &authcontroller.App{CStore: cStore, DB: db}
 	adminApp := &admincontroller.App{CStore: cStore, DB: db}
 	r := mux.NewRouter()
@@ -46,11 +46,13 @@ func main() {
 	r.Handle("/api/v1/admins", Adapt(
 		customerr.Check(adminApp.Index),
 		middleware.Auth(cStore),
+		middleware.Notify(logger),
 	)).Methods("GET")
 	r.HandleFunc("/api/v1/logout", authApp.Logout).Methods("GET")
 
 	http.Handle("/", r)
 
+	logger.Println("Started")
 	log.Fatal(http.ListenAndServe(viper.GetString("app.host")+":"+viper.GetString("app.port"), nil))
 }
 
