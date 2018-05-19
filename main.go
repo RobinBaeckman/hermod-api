@@ -10,15 +10,15 @@ import (
 	authcontroller "github.com/RobinBaeckman/hermod-api/application/admin/auth/controller"
 	"github.com/RobinBaeckman/hermod-api/customerr"
 	"github.com/RobinBaeckman/hermod-api/infra/middleware"
+	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/spf13/viper"
-	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {
 	parseConfig()
-	db := newMongoDB()
+	db := mongo.NewDB()
 	cStore := sessions.NewCookieStore([]byte(viper.GetString("session.auth_key")))
 	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), 3)
 	authApp := &authcontroller.App{CStore: cStore, DB: db}
@@ -70,18 +70,4 @@ func parseConfig() {
 	if err != nil {               // Handle errors reading the config file
 		fmt.Errorf("Fatal error config file: %s \n", err)
 	}
-}
-
-func newMongoDB() *mgo.Database {
-	session, err := mgo.Dial("localhost")
-	if err != nil {
-		panic(err)
-	}
-
-	// Optional. Switch the session to a monotonic behavior.
-	session.SetMode(mgo.Monotonic, true)
-
-	c := session.DB("hermod")
-
-	return c
 }
