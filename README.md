@@ -3,4 +3,6 @@
 </p>
 <h2 align="center">Hermod-API</h2>
 
-Go-api using clean architecture.
+Go-api following clean architecture.
+
+MongoDB should be installed before running. Postman collection is found in test/functional.
