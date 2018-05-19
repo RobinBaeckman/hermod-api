@@ -4,28 +4,28 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/RobinBaeckman/hermod-api/customerr"
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/admin"
 	"github.com/gorilla/mux"
 )
 
-func mapCreateRequest(r *http.Request) (admin.InputData, error) {
-	ind := admin.InputData{}
+func mapStoreRequest(r *http.Request) (admin.InputDataStore, error) {
+	ind := admin.InputDataStore{}
 	decoder := json.NewDecoder(r.Body)
 
 	err := decoder.Decode(&ind)
 	if err != nil {
-		return ind, &customerr.App{err, "Missing parameters", 404}
+		return ind, err
 	}
+
 	defer r.Body.Close()
 
 	return ind, nil
 }
 
-func mapGetRequest(r *http.Request) (admin.InputData, error) {
+func mapShowRequest(r *http.Request) (admin.InputDataShow, error) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-	ind := admin.InputData{
+	ind := admin.InputDataShow{
 		ID: id,
 	}
 

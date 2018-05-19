@@ -5,12 +5,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type InputData struct {
-	ID        string
+type InputDataStore struct {
 	Email     string
 	Password  string
 	FirstName string
 	LastName  string
+}
+
+type InputDataShow struct {
+	ID string
 }
 
 type OutputData struct {
@@ -31,14 +34,13 @@ func (outd *OutputData) Map(a *domain.Admin) {
 	}
 }
 
-func (ind InputData) MapWhole(a *domain.Admin) error {
+func (ind InputDataStore) Map(a *domain.Admin) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(ind.Password), bcrypt.DefaultCost)
 	a.Password = hash
 	if err != nil {
 		return err
 	}
 	*a = domain.Admin{
-		ID:        ind.ID,
 		Email:     ind.Email,
 		Password:  hash,
 		FirstName: ind.FirstName,
@@ -48,9 +50,8 @@ func (ind InputData) MapWhole(a *domain.Admin) error {
 	return nil
 }
 
-func (ind InputData) Map(a *domain.Admin) {
+func (ind InputDataShow) Map(a *domain.Admin) {
 	*a = domain.Admin{
-		ID:    ind.ID,
-		Email: ind.Email,
+		ID: ind.ID,
 	}
 }

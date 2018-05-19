@@ -7,6 +7,7 @@ import (
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/admin/view"
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/admin"
+	"github.com/RobinBaeckman/hermod-api/validate"
 	"github.com/gorilla/sessions"
 	mgo "gopkg.in/mgo.v2"
 )
@@ -27,10 +28,16 @@ func (a *App) Store(w http.ResponseWriter, r *http.Request) (err error) {
 	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(&mongo.AdminDB{db}, w)
-	ind, err := mapCreateRequest(r)
+
+	ind, err := mapStoreRequest(r)
 	if err != nil {
 		return err
 	}
+
+	if err := validate.Check(&ind); err != nil {
+		return err
+	}
+
 	if err := i.Store(ind); err != nil {
 		return err
 	}
@@ -42,10 +49,15 @@ func (a *App) Show(w http.ResponseWriter, r *http.Request) (err error) {
 	db := a.DB.With(a.DB.Session.Copy())
 	defer db.Session.Close()
 	i := NewInteractor(&mongo.AdminDB{db}, w)
-	ind, err := mapGetRequest(r)
+	ind, err := mapShowRequest(r)
 	if err != nil {
 		return err
 	}
+
+	if err := validate.Check(&ind); err != nil {
+		return err
+	}
+
 	if err := i.Show(ind); err != nil {
 		return err
 	}

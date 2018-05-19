@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/RobinBaeckman/hermod-api/application/admin/auth/presenter"
@@ -9,6 +8,7 @@ import (
 	"github.com/RobinBaeckman/hermod-api/infra/mongo"
 	"github.com/RobinBaeckman/hermod-api/infra/web/admin/auth/view"
 	"github.com/RobinBaeckman/hermod-api/usecase/admin/auth"
+	"github.com/RobinBaeckman/hermod-api/validate"
 	"github.com/gorilla/sessions"
 	"github.com/spf13/viper"
 	mgo "gopkg.in/mgo.v2"
@@ -34,15 +34,16 @@ func (a *App) Auth(w http.ResponseWriter, r *http.Request) (err error) {
 		presenter.Presenter{view.Viewer{w, r, a.CStore}},
 	)
 
-	ind := &auth.InputData{}
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(ind)
+	ind, err := mapAuthRequest(r)
 	if err != nil {
 		return err
 	}
-	defer r.Body.Close()
 
-	if err := i.Auth(*ind); err != nil {
+	if err := validate.Check(&ind); err != nil {
+		return err
+	}
+
+	if err := i.Auth(ind); err != nil {
 		return err
 	}
 

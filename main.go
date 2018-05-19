@@ -18,7 +18,7 @@ import (
 
 func main() {
 	parseConfig()
-	db := newMongo()
+	db := newMongoDB()
 	cStore := sessions.NewCookieStore([]byte(viper.GetString("session.auth_key")))
 	logger := log.New(os.Stdout, viper.GetString("app.log_prefix"), log.Ltime)
 	authApp := &authcontroller.App{CStore: cStore, DB: db}
@@ -70,7 +70,7 @@ func parseConfig() {
 	}
 }
 
-func newMongo() *mgo.Database {
+func newMongoDB() *mgo.Database {
 	session, err := mgo.Dial("localhost")
 	if err != nil {
 		panic(err)

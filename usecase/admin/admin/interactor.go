@@ -44,7 +44,7 @@ func (i *Interactor) Index() (err error) {
 	return
 }
 
-func (i *Interactor) Show(ind InputData) (err error) {
+func (i *Interactor) Show(ind InputDataShow) (err error) {
 	a := &domain.Admin{}
 	ind.Map(a)
 	err = i.Get(a)
@@ -60,9 +60,9 @@ func (i *Interactor) Show(ind InputData) (err error) {
 	return
 }
 
-func (i *Interactor) Store(ind InputData) (err error) {
+func (i *Interactor) Store(ind InputDataStore) (err error) {
 	a := &domain.Admin{}
-	if err = ind.MapWhole(a); err != nil {
+	if err = ind.Map(a); err != nil {
 		return err
 	}
 	err = i.Persist(a)
