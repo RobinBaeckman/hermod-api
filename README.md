@@ -1,7 +1,7 @@
 <p align="center">
   <img width="230" src="https://github.com/RobinBaeckman/hermod-api/blob/master/images/hermod.png">
 </p>
-<p align="center"><strong>Hermod-API</strong></p>
+<p align="center"><strong size="20">Hermod-API</strong></p>
 <hr>
 <br>
 <br>
